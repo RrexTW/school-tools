@@ -190,7 +190,7 @@ const SeatsPage = () => {
         flexDirection: "column",
       }}
     >
-      <h1>隨機排座位 (React + Vite)</h1>
+      <h1>隨機排座位</h1>
 
       {/* 控制區 */}
       <div
