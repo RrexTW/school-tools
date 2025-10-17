@@ -3,15 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://RrexTW.github.io/school-tools/",
+  "homepage": "https://rrextw.github.io/school-tools/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist -r https://github.com/RrexTW/school-tools.git"
-
+    "deploy": "gh-pages -d dist -r https://github.com/rrextw/school-tools.git --git-dir=."
   },
   "dependencies": {
     "papaparse": "^5.5.3",
