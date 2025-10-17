@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist -r https://github.com/rrextw/school-tools.git --git-dir=."
+    "deploy": "gh-pages -d dist --repo https://github.com/rrextw/school-tools.git"
   },
   "dependencies": {
     "papaparse": "^5.5.3",
