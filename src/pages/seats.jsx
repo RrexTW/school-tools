@@ -89,42 +89,58 @@ const SeatsPage = () => {
   // 當拖放資料類型為 "seat" 時，執行座位資料的交換及後續狀態更新
   function handleDropNameToSeat(dragData, seatIndex) {
     const newGrid = [...grid];
-    const seat = newGrid[seatIndex];
-    // 允許落在空席或鎖定席位，但仍需檢查空席
-    if (seat.empty) return;
-
+    const targetSeat = newGrid[seatIndex];
+    // 不允許落在空位
+    if (targetSeat.empty) return;
+    
     if (dragData.type === "name") {
       const name = dragData.value;
-      const student = names.find((n) => n.name === name);
+      const student = names.find(n => n.name === name);
       if (!student || student.status === "skip") return;
-
-      const existing = seat.name;
-      newGrid[seatIndex].name = name;
-      // 根據目標席位是否被鎖定決定學生狀態：鎖定則為 "lock"，否則為 "assigned"
-      const newStatus = seat.locked ? "lock" : "assigned";
-  
-      const updatedNames = names.map((n) => {
-        if(n.name === name) return { ...n, status: newStatus };
-        if(n.name === existing) return { ...n, status: "unassigned" };
-        return n;
-      });
-      setGrid(newGrid);
-      setNames(updatedNames);
+      // 檢查該學生是否已佔有座位
+      const oldSeatIndex = grid.findIndex(cell => cell.name === name);
+      if (oldSeatIndex !== -1 && oldSeatIndex !== seatIndex) {
+        // 交換邏輯：如果新位置有其他學生，則將該學生移至原位置；若新位空，則原位置清空
+        const sourceSeat = newGrid[oldSeatIndex];
+        const occupantB = targetSeat.name; // 可能為 undefined
+        newGrid[seatIndex].name = name;
+        newGrid[oldSeatIndex].name = occupantB || null;
+        const newStatusA = targetSeat.locked ? "lock" : "assigned";
+        const updatedNames = names.map(n => {
+          if (n.name === name) return { ...n, status: newStatusA };
+          if (occupantB && n.name === occupantB) {
+            const newStatusB = sourceSeat.locked ? "lock" : "assigned";
+            return { ...n, status: newStatusB };
+          }
+          return n;
+        });
+        setGrid(newGrid);
+        setNames(updatedNames);
+      } else {
+        // 正常指派邏輯
+        const existing = targetSeat.name;
+        newGrid[seatIndex].name = name;
+        const newStatus = targetSeat.locked ? "lock" : "assigned";
+        const updatedNames = names.map(n => {
+          if(n.name === name) return { ...n, status: newStatus };
+          if(n.name === existing) return { ...n, status: "unassigned" };
+          return n;
+        });
+        setGrid(newGrid);
+        setNames(updatedNames);
+      }
     } else if (dragData.type === "seat") {
       const fromIndex = dragData.index;
       if (fromIndex === seatIndex) return;
-      const newGrid = [...grid];
-      // 交換座位上的學生
-      const temp = newGrid[seatIndex].name;
-      newGrid[seatIndex].name = newGrid[fromIndex].name;
-      newGrid[fromIndex].name = temp;
-      setGrid(newGrid);
-  
-      // 更新交換後每個席位上學生的狀態，依各自 cell 的鎖定狀態決定
-      const updatedNames = names.map((n) => {
-        if (newGrid.some((c, idx) => c.name === n.name && c.locked && (idx === seatIndex || idx === fromIndex)))
+      const newGridSwap = [...grid];
+      const temp = newGridSwap[seatIndex].name;
+      newGridSwap[seatIndex].name = newGridSwap[fromIndex].name;
+      newGridSwap[fromIndex].name = temp;
+      setGrid(newGridSwap);
+      const updatedNames = names.map(n => {
+        if (newGridSwap.some((c, idx) => c.name === n.name && c.locked && (idx === seatIndex || idx === fromIndex)))
           return { ...n, status: "lock" };
-        if (newGrid.some((c, idx) => c.name === n.name && !c.locked && (idx === seatIndex || idx === fromIndex)))
+        if (newGridSwap.some((c, idx) => c.name === n.name && !c.locked && (idx === seatIndex || idx === fromIndex)))
           return { ...n, status: "assigned" };
         return n;
       });
@@ -181,6 +197,14 @@ const SeatsPage = () => {
     setNames(updatedNames);
   }
 
+  // 新增：當座位清空且原有學生被移除時，將該學生狀態設為 "unassigned"
+  function handleEmptySeat(name) {
+    const updatedNames = names.map(n =>
+      n.name === name ? { ...n, status: "unassigned" } : n
+    );
+    setNames(updatedNames);
+  }
+
   return (
     <div
       style={{
@@ -191,6 +215,7 @@ const SeatsPage = () => {
       }}
     >
       <h1>隨機排座位</h1>
+      <h3>說明：點擊座位可設定為空位，Shift+左鍵可鎖定/解鎖座位。</h3>
 
       {/* 控制區 */}
       <div
@@ -227,6 +252,7 @@ const SeatsPage = () => {
           cols={cols}
           onDropData={handleDropNameToSeat}
           onLockToggle={handleLockToggle}
+          onEmptySeat={handleEmptySeat}
         />
 
         {/* 名單區 */}

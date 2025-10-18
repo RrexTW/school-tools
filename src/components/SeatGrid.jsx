@@ -1,9 +1,9 @@
 import React from 'react'
 
-export default function SeatGrid({grid, setGrid, rows, cols, onDropData, onLockToggle}){
+export default function SeatGrid({grid, setGrid, rows, cols, onDropData, onLockToggle, onEmptySeat}){
   function handleCellClick(i, e){
+    const g = [...grid];
     if(e.shiftKey){
-      const g = [...grid]; 
       g[i].locked = !g[i].locked;
       setGrid(g)
       // 若該格有學生，鎖定時設定學生狀態為 "lock"，解鎖則設定為 "assigned"
@@ -11,9 +11,15 @@ export default function SeatGrid({grid, setGrid, rows, cols, onDropData, onLockT
         onLockToggle(g[i].name, g[i].locked)
       }
     } else {
-      const g = [...grid]; 
-      g[i].empty = !g[i].empty; 
-      if(g[i].empty) g[i].name = null;
+      // 取得原本的學生名稱
+      const studentName = g[i].name;
+      g[i].empty = !g[i].empty;
+      if(g[i].empty){
+        if(studentName && typeof onEmptySeat === 'function'){
+          onEmptySeat(studentName)
+        }
+        g[i].name = null;
+      }
       setGrid(g)
     }
   }
@@ -65,7 +71,7 @@ export default function SeatGrid({grid, setGrid, rows, cols, onDropData, onLockT
           }}
         >
           <div>
-            <div style={{fontSize:13, color:'#666'}}>{`#${Math.floor(i/cols)+1}-${(i%cols)+1}`}</div>
+            <div style={{fontSize:13, color:'#666'}}>{`${Math.floor(i/cols)+1} - ${(i%cols)+1}`}</div>
             <div style={{fontWeight:600, marginTop:6}}>{cell.name ?? (cell.empty ? '（空）' : '')}</div>
             {cell.locked && <div style={{fontSize:11, color:'#006400'}}>鎖定</div>}
           </div>
