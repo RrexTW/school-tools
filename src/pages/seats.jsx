@@ -208,14 +208,14 @@ const SeatsPage = () => {
   return (
     <div
       style={{
-        padding: 20,
+        padding: 10,
         fontFamily: "sans-serif",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <h1>隨機排座位</h1>
-      <h3>說明：點擊座位可設定為空位，Shift+左鍵可鎖定/解鎖座位。</h3>
+      <div style={{fontSize:'48px',fontWeight: 'bold'}}>隨機排座位</div>
+      <div style={{fontSize:'24px',fontWeight: 'bold'}}>說明：點擊座位可設定為空位，Shift+左鍵可鎖定/解鎖座位。</div>
 
       {/* 控制區 */}
       <div
